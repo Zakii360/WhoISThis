@@ -1,11 +1,22 @@
 /*
 ==========================================================
 WhoISThis
-dns.js
 
-Public DNS Intelligence Engine
+dns.js v2
 
-Uses DNS over HTTPS
+DNS Intelligence Engine
+
+Uses DNS-over-HTTPS
+
+Supports:
+A
+AAAA
+MX
+TXT
+NS
+CNAME
+SOA
+
 ==========================================================
 */
 
@@ -26,7 +37,7 @@ resolver:
 
 
 // ======================================================
-// DNS Query
+// Query DNS
 // ======================================================
 
 
@@ -40,7 +51,7 @@ async query(domain,type){
         const response =
         await fetch(
 
-            `${this.resolver}?name=${domain}&type=${type}`,
+            `${this.resolver}?name=${encodeURIComponent(domain)}&type=${type}`,
 
             {
 
@@ -72,12 +83,13 @@ async query(domain,type){
 
 
         console.error(
-            "DNS Error:",
+            "DNS query error:",
             error
         );
 
 
         return [];
+
 
     }
 
@@ -92,30 +104,64 @@ async query(domain,type){
 
 
 // ======================================================
-// Format Results
+// Clean DNS values
 // ======================================================
 
 
-format(records){
+clean(records,type){
 
 
 
-    return records.map(
-        record=>({
+    return records.map(record=>{
+
+
+        let value =
+        record.data;
+
+
+
+        // Remove quotes from TXT
+
+        if(type==="TXT"){
+
+
+            value =
+            value
+            .replaceAll(
+                '"',
+                ""
+            );
+
+
+        }
+
+
+
+        return {
+
 
             name:
             record.name,
 
+
             type:
-            record.type,
-
-            value:
-            record.data
+            type,
 
 
-        })
+            value:value,
 
-    );
+
+            ttl:
+            record.TTL
+
+
+
+        };
+
+
+    });
+
+
 
 },
 
@@ -126,7 +172,61 @@ format(records){
 
 
 // ======================================================
-// Full DNS Analysis
+// MX Sorting
+// ======================================================
+
+
+cleanMX(records){
+
+
+
+    return records
+
+    .map(record=>{
+
+
+        const parts =
+        record.data.split(
+            " "
+        );
+
+
+
+        return {
+
+
+            priority:
+            parts[0],
+
+
+            server:
+            parts[1]
+
+
+
+        };
+
+
+    })
+
+
+    .sort(
+        (a,b)=>
+        a.priority-b.priority
+    );
+
+
+
+},
+
+
+
+
+
+
+
+// ======================================================
+// Full Domain Analysis
 // ======================================================
 
 
@@ -136,19 +236,23 @@ async analyze(domain){
 
     const [
 
-        a,
+        A,
 
-        aaaa,
+        AAAA,
 
-        mx,
+        MX,
 
-        txt,
+        TXT,
 
-        ns,
+        NS,
 
-        cname
+        CNAME,
+
+        SOA
+
 
     ] = await Promise.all([
+
 
 
         this.query(
@@ -157,10 +261,12 @@ async analyze(domain){
         ),
 
 
+
         this.query(
             domain,
             "AAAA"
         ),
+
 
 
         this.query(
@@ -169,10 +275,12 @@ async analyze(domain){
         ),
 
 
+
         this.query(
             domain,
             "TXT"
         ),
+
 
 
         this.query(
@@ -181,9 +289,17 @@ async analyze(domain){
         ),
 
 
+
         this.query(
             domain,
             "CNAME"
+        ),
+
+
+
+        this.query(
+            domain,
+            "SOA"
         )
 
 
@@ -195,7 +311,8 @@ async analyze(domain){
 
 
 
-    return {
+    const result = {
+
 
 
 
@@ -206,38 +323,63 @@ async analyze(domain){
         records:{
 
 
-
             A:
-            this.format(a),
+            this.clean(
+                A,
+                "A"
+            ),
 
 
 
             AAAA:
-            this.format(aaaa),
+            this.clean(
+                AAAA,
+                "AAAA"
+            ),
 
 
 
             MX:
-            this.format(mx),
+            this.cleanMX(
+                MX
+            ),
 
 
 
             TXT:
-            this.format(txt),
+            this.clean(
+                TXT,
+                "TXT"
+            ),
 
 
 
             NS:
-            this.format(ns),
+            this.clean(
+                NS,
+                "NS"
+            ),
 
 
 
             CNAME:
-            this.format(cname)
+            this.clean(
+                CNAME,
+                "CNAME"
+            ),
 
+
+
+            SOA:
+            this.clean(
+                SOA,
+                "SOA"
+            )
 
 
         },
+
+
 
 
 
@@ -245,30 +387,42 @@ async analyze(domain){
 
 
             ipv4:
-            a.length,
+            A.length,
 
 
             ipv6:
-            aaaa.length,
+            AAAA.length,
 
 
             mailServers:
-            mx.length,
+            MX.length,
+
+
+            txtRecords:
+            TXT.length,
 
 
             nameservers:
-            ns.length
+            NS.length,
+
+
+            aliases:
+            CNAME.length
+
 
 
         }
 
 
 
-
-
     };
 
 
+
+
+
+
+    return result;
 
 
 
@@ -287,7 +441,7 @@ async analyze(domain){
 
 console.log(
 
-"%cWhoISThis DNS Engine Loaded",
+"%cWhoISThis DNS Engine v2 Loaded",
 
 "color:#00d4ff;font-weight:bold;"
 
