@@ -2,14 +2,9 @@
 ==========================================================
 WhoISThis
 
-script.js
+script.js v3
 
-Main Dashboard Controller
-
-Supports:
-- IP
-- Domain
-- MAC
+Universal Intelligence Renderer
 
 ==========================================================
 */
@@ -30,14 +25,12 @@ document.getElementById("results");
 
 
 
-
 // ======================================================
-// UI Helpers
+// UI Functions
 // ======================================================
 
 
 function set(id,value){
-
 
     const el =
     document.getElementById(id);
@@ -46,10 +39,9 @@ function set(id,value){
     if(el){
 
         el.textContent =
-        value ?? "-";
+        value || "-";
 
     }
-
 
 }
 
@@ -57,8 +49,7 @@ function set(id,value){
 
 
 
-function addSummary(text){
-
+function summary(text){
 
     const list =
     document.getElementById(
@@ -81,10 +72,7 @@ function addSummary(text){
     "• " + text;
 
 
-    list.appendChild(
-        item
-    );
-
+    list.appendChild(item);
 
 }
 
@@ -92,8 +80,7 @@ function addSummary(text){
 
 
 
-function clearUI(){
-
+function clear(){
 
     document
     .querySelectorAll(
@@ -101,29 +88,17 @@ function clearUI(){
     )
     .forEach(el=>{
 
-
-        if(
-            el.id !== "status"
-        ){
-
-            el.textContent="-";
-
-        }
-
+        el.textContent="-";
 
     });
 
 
 
-    const list =
-    document.getElementById(
+    document
+    .getElementById(
         "summaryList"
-    );
-
-
-    if(list)
-        list.innerHTML="";
-
+    )
+    .innerHTML="";
 
 }
 
@@ -133,14 +108,12 @@ function clearUI(){
 
 
 
-
-
 // ======================================================
-// IP Intelligence
+// IP Engine
 // ======================================================
 
 
-async function analyzeIP(ip){
+async function getIPData(ip){
 
 
 
@@ -150,6 +123,7 @@ async function analyzeIP(ip){
     );
 
 
+
     const data =
     await response.json();
 
@@ -157,178 +131,31 @@ async function analyzeIP(ip){
 
     if(!data.success)
         throw new Error(
-            "IP lookup failed"
+            "Invalid IP"
         );
 
 
 
+    return {
 
 
-    set(
-        "ip",
-        data.ip
-    );
+        type:"IP",
 
 
-    set(
-        "version",
-        data.type
-    );
+        target:data.ip,
 
 
-    set(
-        "country",
-        data.country
-    );
+        location:data,
 
 
-    set(
-        "region",
-        data.region
-    );
+        network:data.connection,
 
 
-    set(
-        "city",
-        data.city
-    );
+        security:data.security || {}
 
 
 
-
-    set(
-        "isp",
-        data.connection?.isp
-    );
-
-
-    set(
-        "org",
-        data.connection?.org
-    );
-
-
-    set(
-        "asn",
-        data.connection?.asn
-    );
-
-
-    set(
-        "domain",
-        data.connection?.domain
-    );
-
-
-
-
-    set(
-        "lat",
-        data.latitude
-    );
-
-
-    set(
-        "lon",
-        data.longitude
-    );
-
-
-    set(
-        "timezone",
-        data.timezone?.id
-    );
-
-
-
-
-
-    const security =
-    data.security || {};
-
-
-
-    set(
-        "vpn",
-        security.vpn ? "Yes":"No"
-    );
-
-
-    set(
-        "proxy",
-        security.proxy ? "Yes":"No"
-    );
-
-
-    set(
-        "tor",
-        security.tor ? "Yes":"No"
-    );
-
-
-    set(
-        "hosting",
-        security.hosting ? "Yes":"No"
-    );
-
-
-
-
-    set(
-        "confidence",
-        "🟢 Verified"
-    );
-
-
-
-    addSummary(
-        `Located in ${data.city}, ${data.country}`
-    );
-
-
-    addSummary(
-        `Network: ${data.connection?.isp}`
-    );
-
-
-
-    // WHOIS / RDAP
-
-    const whois =
-    await WhoISThisWHOIS.analyze(ip);
-
-
-
-    if(whois.success){
-
-
-        set(
-            "whoisOrg",
-            whois.organization
-        );
-
-
-        set(
-            "created",
-            whois.created
-        );
-
-
-        set(
-            "updated",
-            whois.updated
-        );
-
-
-        set(
-            "expires",
-            whois.expires
-        );
-
-
-    }
-
-
+    };
 
 }
 
@@ -336,38 +163,18 @@ async function analyzeIP(ip){
 
 
 
-
-
-
-
 // ======================================================
-// Domain Intelligence
+// Domain Engine
 // ======================================================
 
 
-async function analyzeDomain(domain){
+async function getDomainData(domain){
 
 
 
-    set(
-        "ip",
-        domain
+    summary(
+        "Resolving domain intelligence..."
     );
-
-
-    set(
-        "version",
-        "DOMAIN"
-    );
-
-
-
-    addSummary(
-        `Website analysis: ${domain}`
-    );
-
-
-
 
 
 
@@ -378,54 +185,37 @@ async function analyzeDomain(domain){
 
 
 
-
-    set(
-        "aRecords",
-        dns.records.A
-        .map(
-            x=>x.value
-        )
-        .join(", ")
+    const ips =
+    dns.records.A
+    .map(
+        x=>x.value
     );
 
 
 
-    set(
-        "aaaaRecords",
-        dns.records.AAAA
-        .map(
-            x=>x.value
-        )
-        .join(", ")
-    );
+
+    let ipData=null;
 
 
 
-    set(
-        "mxRecords",
-        dns.records.MX
-        .map(
-            x=>x.value
-        )
-        .join(", ")
-    );
+    if(ips.length){
 
 
-
-    set(
-        "nameservers",
-        dns.records.NS
-        .map(
-            x=>x.value
-        )
-        .join(", ")
-    );
+        try{
 
 
+            ipData =
+            await getIPData(
+                ips[0]
+            );
 
-    addSummary(
-        `${dns.summary.ipv4} IPv4 DNS records found`
-    );
+
+        }
+
+        catch{}
+
+    }
+
 
 
 
@@ -438,46 +228,220 @@ async function analyzeDomain(domain){
 
 
 
-    if(whois.success){
+
+    const ssl =
+    await WhoISThisSSL.analyze(
+        domain
+    );
 
 
-        set(
-            "whoisOrg",
-            whois.organization
+
+
+
+
+    return {
+
+
+        type:"DOMAIN",
+
+
+        target:domain,
+
+
+        dns,
+
+
+        whois,
+
+
+        ssl,
+
+
+        ipData
+
+
+
+    };
+
+}
+
+
+
+
+
+
+
+// ======================================================
+// MAC Engine
+// ======================================================
+
+
+async function getMACData(mac){
+
+
+    const data =
+    await WhoISThisMAC.analyze(
+        mac
+    );
+
+
+    if(!data.success)
+        throw new Error(
+            "Invalid MAC"
         );
 
 
-        set(
-            "created",
-            whois.created
-        );
+
+    return {
 
 
-        set(
-            "updated",
-            whois.updated
-        );
+        type:"MAC",
 
 
-        set(
-            "expires",
-            whois.expires
-        );
+        mac:data
 
 
-        addSummary(
-            `Owner: ${whois.organization}`
-        );
+    };
 
 
-    }
+}
 
+
+
+
+
+
+
+
+// ======================================================
+// Render Common Data
+// ======================================================
+
+
+function renderIP(data){
+
+
+
+    const ip =
+    data.location;
 
 
 
     set(
-        "confidence",
-        "🟢 DNS Verified"
+        "ip",
+        ip.ip
+    );
+
+
+    set(
+        "version",
+        ip.type
+    );
+
+
+    set(
+        "country",
+        ip.country
+    );
+
+
+    set(
+        "region",
+        ip.region
+    );
+
+
+    set(
+        "city",
+        ip.city
+    );
+
+
+
+    set(
+        "isp",
+        data.network?.isp
+    );
+
+
+    set(
+        "org",
+        data.network?.org
+    );
+
+
+    set(
+        "asn",
+        data.network?.asn
+    );
+
+
+    set(
+        "domain",
+        data.network?.domain
+    );
+
+
+
+    set(
+        "lat",
+        ip.latitude
+    );
+
+
+    set(
+        "lon",
+        ip.longitude
+    );
+
+
+    set(
+        "timezone",
+        ip.timezone?.id
+    );
+
+
+
+    set(
+        "vpn",
+        data.security.vpn
+        ? "Yes"
+        : "No"
+    );
+
+
+    set(
+        "proxy",
+        data.security.proxy
+        ? "Yes"
+        : "No"
+    );
+
+
+    set(
+        "tor",
+        data.security.tor
+        ? "Yes"
+        : "No"
+    );
+
+
+    set(
+        "hosting",
+        data.security.hosting
+        ? "Yes"
+        : "No"
+    );
+
+
+
+    summary(
+        `ISP: ${data.network?.isp}`
+    );
+
+
+    summary(
+        `ASN: ${data.network?.asn}`
     );
 
 
@@ -492,41 +456,149 @@ async function analyzeDomain(domain){
 
 
 
-// ======================================================
-// MAC Intelligence
-// ======================================================
-
-
-async function analyzeMAC(mac){
-
+function renderDNS(dns){
 
 
     set(
-        "ip",
-        mac
+        "aRecords",
+        dns.records.A
+        .map(x=>x.value)
+        .join(", ")
     );
 
 
     set(
-        "version",
-        "MAC"
+        "aaaaRecords",
+        dns.records.AAAA
+        .map(x=>x.value)
+        .join(", ")
+    );
+
+
+    set(
+        "mxRecords",
+        dns.records.MX
+        .map(x=>x.value)
+        .join(", ")
+    );
+
+
+    set(
+        "txtRecords",
+        dns.records.TXT
+        .map(x=>x.value)
+        .join(", ")
+    );
+
+
+    set(
+        "nameservers",
+        dns.records.NS
+        .map(x=>x.value)
+        .join(", ")
+    );
+
+
+}
+
+
+
+
+
+
+
+
+function renderWHOIS(data){
+
+
+    if(!data?.success)
+        return;
+
+
+
+    set(
+        "whoisOrg",
+        data.organization
+    );
+
+
+    set(
+        "created",
+        data.created
+    );
+
+
+    set(
+        "updated",
+        data.updated
+    );
+
+
+    set(
+        "expires",
+        data.expires
+    );
+
+
+    set(
+        "whoisNS",
+        data.nameservers
+        ?.join(", ")
+    );
+
+
+}
+
+
+
+
+
+
+
+
+function renderSSL(data){
+
+
+    if(!data?.success)
+        return;
+
+
+
+    set(
+        "sslIssuer",
+        data.issuer
+    );
+
+
+    set(
+        "sslCount",
+        data.certificates
+    );
+
+
+    set(
+        "sslFirst",
+        data.firstSeen
+    );
+
+
+    set(
+        "sslLatest",
+        data.latestSeen
     );
 
 
 
-
-    const data =
-    await WhoISThisMAC.analyze(
-        mac
-    );
+}
 
 
 
-    if(!data.success)
-        throw new Error(
-            data.error
-        );
 
+
+
+
+
+function renderMAC(data){
 
 
 
@@ -555,23 +627,6 @@ async function analyzeMAC(mac){
 
 
 
-    addSummary(
-        `Manufacturer: ${data.vendor}`
-    );
-
-
-    addSummary(
-        `Hardware class: ${data.type}`
-    );
-
-
-
-    set(
-        "confidence",
-        "🟡 OUI Match"
-    );
-
-
 }
 
 
@@ -583,7 +638,7 @@ async function analyzeMAC(mac){
 
 
 // ======================================================
-// Main Analyze
+// Main Analyzer
 // ======================================================
 
 
@@ -601,8 +656,7 @@ async function analyze(){
 
 
 
-
-    clearUI();
+    clear();
 
 
 
@@ -637,9 +691,10 @@ async function analyze(){
 
 
 
-        addSummary(
-            `Detected type: ${type}`
+        summary(
+            `Detected ${type}`
         );
+
 
 
 
@@ -651,12 +706,21 @@ async function analyze(){
         ){
 
 
-            await analyzeIP(
+            const data =
+            await getIPData(
                 clean
             );
 
 
+            renderIP(data);
+
+
         }
+
+
+
+
+
 
 
         else if(
@@ -664,12 +728,44 @@ async function analyze(){
         ){
 
 
-            await analyzeDomain(
+            const data =
+            await getDomainData(
                 clean
             );
 
 
+
+            if(data.ipData){
+
+                renderIP(
+                    data.ipData
+                );
+
+            }
+
+
+            renderDNS(
+                data.dns
+            );
+
+
+            renderWHOIS(
+                data.whois
+            );
+
+
+            renderSSL(
+                data.ssl
+            );
+
+
         }
+
+
+
+
+
+
 
 
         else if(
@@ -677,19 +773,26 @@ async function analyze(){
         ){
 
 
-            await analyzeMAC(
+            const data =
+            await getMACData(
                 clean
             );
 
 
+            renderMAC(
+                data.mac
+            );
+
+
         }
+
 
 
         else{
 
 
             throw new Error(
-                "Unsupported input"
+                "Unknown input"
             );
 
 
@@ -697,6 +800,12 @@ async function analyze(){
 
 
 
+
+
+        set(
+            "confidence",
+            "🟢 Public Data Verified"
+        );
 
 
         set(
@@ -712,6 +821,7 @@ async function analyze(){
     catch(error){
 
 
+
         console.error(
             error
         );
@@ -723,17 +833,18 @@ async function analyze(){
         );
 
 
-        addSummary(
+        summary(
             error.message
         );
+
 
 
     }
 
 
 
-
 }
+
 
 
 
@@ -752,30 +863,20 @@ analyze;
 
 
 
-
 input.onkeydown =
-(e)=>{
+e=>{
 
 
-    if(
-        e.key==="Enter"
-    ){
-
+    if(e.key==="Enter")
         analyze();
-
-    }
 
 
 };
 
 
 
-
-
 document
-.querySelectorAll(
-    ".example"
-)
+.querySelectorAll(".example")
 .forEach(btn=>{
 
 
@@ -784,7 +885,7 @@ document
 
 
         input.value =
-        btn.textContent.trim();
+        btn.textContent;
 
 
         analyze();
@@ -800,6 +901,6 @@ document
 
 
 console.log(
-"%cWhoISThis Ready",
+"%cWhoISThis v3 Online",
 "color:#00d4ff;font-size:18px;font-weight:bold;"
 );
