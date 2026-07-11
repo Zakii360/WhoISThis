@@ -1,11 +1,18 @@
 /*
 ==========================================================
 WhoISThis
+
 database.js
 
-Local intelligence databases
+Local Intelligence Database
 
-Contains public classification metadata.
+Contains:
+- OUI vendors
+- Network fingerprints
+- Cloud providers
+- Public DNS
+- Security intelligence
+
 ==========================================================
 */
 
@@ -14,163 +21,165 @@ window.WhoISThisDB = {
 
 
 
-version:"1.0.0",
+
+
+version:
+"2.0.0",
 
 
 
-updated:"2026-07-11",
+updated:
+"2026-07-11",
+
+
 
 
 
 
 
 // ======================================================
-// Country Intelligence
+// Public DNS Intelligence
 // ======================================================
 
 
-countries:{
-
-
-"US":{
-
-name:"United States",
-
-continent:"North America",
-
-currency:"USD",
-
-languages:[
-"English"
-],
-
-internetTLD:".us",
-
-emergency:"911"
-
-},
+publicDNS:{
 
 
 
-"GB":{
+"8.8.8.8":{
 
-name:"United Kingdom",
 
-continent:"Europe",
+provider:
+"Google Public DNS",
 
-currency:"GBP",
 
-languages:[
-"English"
-],
+organization:
+"Google LLC",
 
-internetTLD:".uk",
 
-emergency:"999 / 112"
+asn:
+"AS15169",
+
+
+category:
+"Recursive DNS"
 
 },
 
 
 
-"CA":{
 
-name:"Canada",
-
-continent:"North America",
-
-currency:"CAD",
-
-languages:[
-"English",
-"French"
-],
-
-internetTLD:".ca",
-
-emergency:"911"
-
-},
+"8.8.4.4":{
 
 
+provider:
+"Google Public DNS",
 
-"DE":{
 
-name:"Germany",
+organization:
+"Google LLC",
 
-continent:"Europe",
 
-currency:"EUR",
+asn:
+"AS15169",
 
-languages:[
-"German"
-],
 
-internetTLD:".de",
-
-emergency:"112"
+category:
+"Recursive DNS"
 
 },
 
 
 
-"FR":{
 
-name:"France",
-
-continent:"Europe",
-
-currency:"EUR",
-
-languages:[
-"French"
-],
-
-internetTLD:".fr",
-
-emergency:"112"
-
-},
+"1.1.1.1":{
 
 
+provider:
+"Cloudflare DNS",
 
-"JP":{
 
-name:"Japan",
+organization:
+"Cloudflare Inc",
 
-continent:"Asia",
 
-currency:"JPY",
+asn:
+"AS13335",
 
-languages:[
-"Japanese"
-],
 
-internetTLD:".jp",
-
-emergency:"110 / 119"
+category:
+"Privacy DNS"
 
 },
 
 
 
-"AU":{
 
-name:"Australia",
+"1.0.0.1":{
 
-continent:"Oceania",
 
-currency:"AUD",
+provider:
+"Cloudflare DNS",
 
-languages:[
-"English"
-],
 
-internetTLD:".au",
+organization:
+"Cloudflare Inc",
 
-emergency:"000"
+
+asn:
+"AS13335",
+
+
+category:
+"Privacy DNS"
+
+},
+
+
+
+
+"9.9.9.9":{
+
+
+provider:
+"Quad9",
+
+
+organization:
+"Quad9 Foundation",
+
+
+asn:
+"AS19281",
+
+
+category:
+"Security DNS"
+
+},
+
+
+
+
+"208.67.222.222":{
+
+
+provider:
+"OpenDNS",
+
+
+organization:
+"Cisco",
+
+
+asn:
+"AS36692",
+
+
+category:
+"Recursive DNS"
 
 }
-
 
 
 },
@@ -190,88 +199,349 @@ cloudProviders:{
 
 
 
-"Google":{
+google:{
 
-domains:[
-"googleusercontent.com",
-"google.com"
-],
+
+name:
+"Google Cloud / Google LLC",
+
 
 keywords:[
+
 "Google",
-"Google LLC"
-]
+
+"Google LLC",
+
+"Google Cloud"
+
+],
+
+
+category:
+"Cloud Provider"
 
 },
 
 
 
-"Cloudflare":{
 
-domains:[
-"cloudflare.com"
-],
-
-keywords:[
-"Cloudflare",
-"CF"
-]
-
-},
+amazon:{
 
 
+name:
+"Amazon AWS",
 
-"Amazon AWS":{
-
-domains:[
-
-"amazonaws.com"
-
-],
 
 keywords:[
 
 "Amazon",
-"AWS"
 
-]
+"AWS",
+
+"EC2"
+
+],
+
+
+category:
+"Cloud Provider"
 
 },
 
 
 
-"Microsoft Azure":{
 
-domains:[
+microsoft:{
 
-"azure.com"
 
-],
+name:
+"Microsoft Azure",
+
 
 keywords:[
 
 "Microsoft",
+
 "Azure"
 
-]
+],
+
+
+category:
+"Cloud Provider"
 
 },
 
 
 
-"DigitalOcean":{
 
-domains:[
+cloudflare:{
 
-"digitalocean.com"
+
+name:
+"Cloudflare",
+
+
+keywords:[
+
+"Cloudflare",
+
+"CF"
 
 ],
+
+
+category:
+"CDN / Security"
+
+},
+
+
+
+
+digitalocean:{
+
+
+name:
+"DigitalOcean",
+
 
 keywords:[
 
 "DigitalOcean"
 
-]
+],
+
+
+category:
+"Cloud VPS"
+
+},
+
+
+
+
+vultr:{
+
+
+name:
+"Vultr",
+
+
+keywords:[
+
+"Vultr",
+
+"Choopa"
+
+],
+
+
+category:
+"Cloud VPS"
+
+}
+
+
+},
+
+
+
+
+
+
+
+// ======================================================
+// Hosting Providers
+// ======================================================
+
+
+hostingProviders:{
+
+
+keywords:[
+
+
+"Hetzner",
+
+"OVH",
+
+"DigitalOcean",
+
+"Amazon",
+
+"Google",
+
+"Microsoft",
+
+"Vultr",
+
+"Linode",
+
+"Oracle",
+
+"Alibaba"
+
+
+],
+
+
+
+classification:
+
+"Datacenter / Hosting Network"
+
+
+
+},
+
+
+
+
+
+
+
+// ======================================================
+// VPN / Proxy Indicators
+// ======================================================
+
+
+privacyNetworks:{
+
+
+keywords:[
+
+
+"NordVPN",
+
+"ExpressVPN",
+
+"ProtonVPN",
+
+"Surfshark",
+
+"Mullvad",
+
+"Tor",
+
+"Proxy"
+
+],
+
+
+
+risk:
+
+"Anonymization Service"
+
+
+
+},
+
+
+
+
+
+
+
+// ======================================================
+// Major ASN Intelligence
+// ======================================================
+
+
+asnDatabase:{
+
+
+
+"AS15169":{
+
+
+organization:
+"Google LLC",
+
+
+type:
+"Cloud / Search / DNS"
+
+
+},
+
+
+
+
+"AS13335":{
+
+
+organization:
+"Cloudflare Inc",
+
+
+type:
+"CDN / Security"
+
+
+},
+
+
+
+
+"AS16509":{
+
+
+organization:
+"Amazon AWS",
+
+
+type:
+"Cloud Hosting"
+
+
+},
+
+
+
+
+"AS8075":{
+
+
+organization:
+"Microsoft Corporation",
+
+
+type:
+"Cloud / Enterprise"
+
+
+},
+
+
+
+
+"AS32934":{
+
+
+organization:
+"Meta Platforms",
+
+
+type:
+"Social Platform"
+
+
+},
+
+
+
+
+"AS54113":{
+
+
+organization:
+"Fastly",
+
+
+type:
+"CDN"
 
 }
 
@@ -286,68 +556,234 @@ keywords:[
 
 
 // ======================================================
-// Known Public DNS
+// MAC Vendor Database
 // ======================================================
 
 
-publicDNS:{
-
-
-"8.8.8.8":{
-
-provider:"Google Public DNS",
-
-organization:"Google LLC",
-
-asn:"AS15169"
-
-},
+macVendors:{
 
 
 
-"8.8.4.4":{
+"001A2B":{
 
-provider:"Google Public DNS",
 
-organization:"Google LLC",
+vendor:
+"Cisco Systems",
 
-asn:"AS15169"
+
+device:
+"Network Hardware"
 
 },
 
 
 
-"1.1.1.1":{
 
-provider:"Cloudflare DNS",
-
-organization:"Cloudflare Inc",
-
-asn:"AS13335"
-
-},
+"001B63":{
 
 
+vendor:
+"Apple Inc.",
 
-"1.0.0.1":{
 
-provider:"Cloudflare DNS",
-
-organization:"Cloudflare Inc",
-
-asn:"AS13335"
+device:
+"Consumer Electronics"
 
 },
 
 
 
-"208.67.222.222":{
 
-provider:"OpenDNS",
+"3C5AB4":{
 
-organization:"Cisco",
 
-asn:"AS36692"
+vendor:
+"Google LLC",
+
+
+device:
+"Smart Devices"
+
+},
+
+
+
+
+"F4F5D8":{
+
+
+vendor:
+"Google LLC",
+
+
+device:
+"Consumer Electronics"
+
+},
+
+
+
+
+"FCFBFB":{
+
+
+vendor:
+"Apple Inc.",
+
+
+device:
+"Mobile / Computer"
+
+},
+
+
+
+
+"DCFE07":{
+
+
+vendor:
+"Amazon Technologies",
+
+
+device:
+"IoT / Smart Home"
+
+},
+
+
+
+
+"005056":{
+
+
+vendor:
+"VMware",
+
+
+device:
+"Virtual Machine"
+
+},
+
+
+
+
+"525400":{
+
+
+vendor:
+"QEMU/KVM",
+
+
+device:
+"Virtual Network Interface"
+
+}
+
+
+},
+
+
+
+
+
+
+
+// ======================================================
+// Country Internet Metadata
+// ======================================================
+
+
+countries:{
+
+
+
+US:{
+
+
+name:
+"United States",
+
+
+continent:
+"North America",
+
+
+internet:
+"ARIN"
+
+},
+
+
+
+GB:{
+
+
+name:
+"United Kingdom",
+
+
+continent:
+"Europe",
+
+
+internet:
+"RIPE"
+
+},
+
+
+
+DE:{
+
+
+name:
+"Germany",
+
+
+continent:
+"Europe",
+
+
+internet:
+"RIPE"
+
+},
+
+
+
+JP:{
+
+
+name:
+"Japan",
+
+
+continent:
+"Asia",
+
+
+internet:
+"APNIC"
+
+},
+
+
+
+AU:{
+
+
+name:
+"Australia",
+
+
+continent:
+"Oceania",
+
+
+internet:
+"APNIC"
 
 }
 
@@ -362,62 +798,16 @@ asn:"AS36692"
 
 
 // ======================================================
-// Internet Registries
+// Utility Functions
 // ======================================================
 
 
-registries:{
+findASN(asn){
 
 
-
-ARIN:{
-
-region:"North America",
-
-website:"https://arin.net"
-
-},
-
-
-
-RIPE:{
-
-region:"Europe",
-
-website:"https://ripe.net"
-
-},
-
-
-
-APNIC:{
-
-region:"Asia Pacific",
-
-website:"https://apnic.net"
-
-},
-
-
-
-LACNIC:{
-
-region:"Latin America",
-
-website:"https://lacnic.net"
-
-},
-
-
-
-AFRINIC:{
-
-region:"Africa",
-
-website:"https://afrinic.net"
-
-}
-
+return this.asnDatabase[asn]
+||
+null;
 
 
 },
@@ -425,31 +815,28 @@ website:"https://afrinic.net"
 
 
 
+findMAC(oui){
+
+
+return this.macVendors[oui]
+||
+null;
+
+
+},
 
 
 
-// ======================================================
-// Security Labels
-// ======================================================
+
+findDNS(ip){
 
 
-securityLabels:{
-
-
-
-vpn:"Possible VPN or anonymizer",
-
-proxy:"Proxy service detected",
-
-tor:"Tor exit node",
-
-hosting:"Datacenter or cloud hosting"
-
+return this.publicDNS[ip]
+||
+null;
 
 
 }
-
-
 
 
 
@@ -458,9 +845,12 @@ hosting:"Datacenter or cloud hosting"
 
 
 
+
+
+
 console.log(
 
-"%cWhoISThis Database Loaded",
+"%cWhoISThis Intelligence Database v2 Loaded",
 
 "color:#00d4ff;font-weight:bold;"
 
