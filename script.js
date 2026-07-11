@@ -2,7 +2,9 @@
 ==========================================================
 WhoISThis
 
-Multi Intelligence Controller
+script.js
+
+Main Dashboard Controller
 
 Supports:
 - IP
@@ -14,28 +16,23 @@ Supports:
 
 
 const input =
-document.getElementById(
-    "ipInput"
-);
+document.getElementById("ipInput");
 
 
 const button =
-document.getElementById(
-    "analyzeBtn"
-);
+document.getElementById("analyzeBtn");
 
 
 const results =
-document.getElementById(
-    "results"
-);
+document.getElementById("results");
+
 
 
 
 
 
 // ======================================================
-// Helpers
+// UI Helpers
 // ======================================================
 
 
@@ -58,24 +55,6 @@ function set(id,value){
 
 
 
-function clearSummary(){
-
-
-    const list =
-    document.getElementById(
-        "summaryList"
-    );
-
-
-    if(list){
-
-        list.innerHTML="";
-
-    }
-
-
-}
-
 
 
 function addSummary(text){
@@ -91,19 +70,59 @@ function addSummary(text){
         return;
 
 
-    const li =
+
+    const item =
     document.createElement(
         "li"
     );
 
 
-    li.textContent =
+    item.textContent =
     "• " + text;
 
 
     list.appendChild(
-        li
+        item
     );
+
+
+}
+
+
+
+
+
+function clearUI(){
+
+
+    document
+    .querySelectorAll(
+        "strong"
+    )
+    .forEach(el=>{
+
+
+        if(
+            el.id !== "status"
+        ){
+
+            el.textContent="-";
+
+        }
+
+
+    });
+
+
+
+    const list =
+    document.getElementById(
+        "summaryList"
+    );
+
+
+    if(list)
+        list.innerHTML="";
 
 
 }
@@ -114,8 +133,10 @@ function addSummary(text){
 
 
 
+
+
 // ======================================================
-// IP Analyzer
+// IP Intelligence
 // ======================================================
 
 
@@ -134,13 +155,10 @@ async function analyzeIP(ip){
 
 
 
-    if(!data.success){
-
+    if(!data.success)
         throw new Error(
             "IP lookup failed"
         );
-
-    }
 
 
 
@@ -154,7 +172,7 @@ async function analyzeIP(ip){
 
     set(
         "version",
-        data.type || "IP"
+        data.type
     );
 
 
@@ -174,6 +192,7 @@ async function analyzeIP(ip){
         "city",
         data.city
     );
+
 
 
 
@@ -202,6 +221,7 @@ async function analyzeIP(ip){
 
 
 
+
     set(
         "lat",
         data.latitude
@@ -218,6 +238,8 @@ async function analyzeIP(ip){
         "timezone",
         data.timezone?.id
     );
+
+
 
 
 
@@ -260,26 +282,52 @@ async function analyzeIP(ip){
 
 
     addSummary(
-        `IP located in ${data.country}`
+        `Located in ${data.city}, ${data.country}`
     );
 
 
-    if(data.connection?.isp){
+    addSummary(
+        `Network: ${data.connection?.isp}`
+    );
 
-        addSummary(
-            `Network provider: ${data.connection.isp}`
+
+
+    // WHOIS / RDAP
+
+    const whois =
+    await WhoISThisWHOIS.analyze(ip);
+
+
+
+    if(whois.success){
+
+
+        set(
+            "whoisOrg",
+            whois.organization
         );
+
+
+        set(
+            "created",
+            whois.created
+        );
+
+
+        set(
+            "updated",
+            whois.updated
+        );
+
+
+        set(
+            "expires",
+            whois.expires
+        );
+
 
     }
 
-
-    if(security.hosting){
-
-        addSummary(
-            "This appears to be a hosting/datacenter network."
-        );
-
-    }
 
 
 }
@@ -293,7 +341,7 @@ async function analyzeIP(ip){
 
 
 // ======================================================
-// Domain Analyzer
+// Domain Intelligence
 // ======================================================
 
 
@@ -309,14 +357,15 @@ async function analyzeDomain(domain){
 
     set(
         "version",
-        "Domain"
+        "DOMAIN"
     );
 
 
 
     addSummary(
-        `Analyzing website ${domain}`
+        `Website analysis: ${domain}`
     );
+
 
 
 
@@ -329,50 +378,54 @@ async function analyzeDomain(domain){
 
 
 
-    set(
-        "domain",
-        domain
-    );
-
 
     set(
         "aRecords",
         dns.records.A
-        .map(x=>x.value)
+        .map(
+            x=>x.value
+        )
         .join(", ")
-        ||
-        "-"
     );
+
 
 
     set(
         "aaaaRecords",
         dns.records.AAAA
-        .map(x=>x.value)
+        .map(
+            x=>x.value
+        )
         .join(", ")
-        ||
-        "-"
     );
-
 
 
 
     set(
-        "reverseDNS",
-        "-"
+        "mxRecords",
+        dns.records.MX
+        .map(
+            x=>x.value
+        )
+        .join(", ")
+    );
+
+
+
+    set(
+        "nameservers",
+        dns.records.NS
+        .map(
+            x=>x.value
+        )
+        .join(", ")
     );
 
 
 
     addSummary(
-        `${dns.summary.ipv4} IPv4 records found.`
+        `${dns.summary.ipv4} IPv4 DNS records found`
     );
-
-
-    addSummary(
-        `${dns.summary.nameservers} nameservers found.`
-    );
-
 
 
 
@@ -389,13 +442,31 @@ async function analyzeDomain(domain){
 
 
         set(
-            "org",
+            "whoisOrg",
             whois.organization
         );
 
 
+        set(
+            "created",
+            whois.created
+        );
+
+
+        set(
+            "updated",
+            whois.updated
+        );
+
+
+        set(
+            "expires",
+            whois.expires
+        );
+
+
         addSummary(
-            `Organization: ${whois.organization}`
+            `Owner: ${whois.organization}`
         );
 
 
@@ -406,7 +477,7 @@ async function analyzeDomain(domain){
 
     set(
         "confidence",
-        "🟢 Verified DNS"
+        "🟢 DNS Verified"
     );
 
 
@@ -422,7 +493,7 @@ async function analyzeDomain(domain){
 
 
 // ======================================================
-// MAC Analyzer
+// MAC Intelligence
 // ======================================================
 
 
@@ -438,8 +509,9 @@ async function analyzeMAC(mac){
 
     set(
         "version",
-        "MAC Address"
+        "MAC"
     );
+
 
 
 
@@ -450,27 +522,35 @@ async function analyzeMAC(mac){
 
 
 
-    if(!data.success){
-
+    if(!data.success)
         throw new Error(
             data.error
         );
-
-    }
-
 
 
 
 
     set(
-        "org",
+        "macVendor",
         data.vendor
     );
 
 
     set(
-        "domain",
+        "macOui",
         data.oui
+    );
+
+
+    set(
+        "macType",
+        data.type
+    );
+
+
+    set(
+        "macAssignment",
+        data.assignment
     );
 
 
@@ -481,22 +561,15 @@ async function analyzeMAC(mac){
 
 
     addSummary(
-        `Device category: ${data.type}`
-    );
-
-
-
-    addSummary(
-        `Assignment: ${data.assignment}`
+        `Hardware class: ${data.type}`
     );
 
 
 
     set(
         "confidence",
-        "🟡 OUI Database"
+        "🟡 OUI Match"
     );
-
 
 
 }
@@ -510,7 +583,7 @@ async function analyzeMAC(mac){
 
 
 // ======================================================
-// Main Router
+// Main Analyze
 // ======================================================
 
 
@@ -528,13 +601,14 @@ async function analyze(){
 
 
 
+
+    clearUI();
+
+
+
     results.classList.remove(
         "hidden"
     );
-
-
-
-    clearSummary();
 
 
 
@@ -548,7 +622,6 @@ async function analyze(){
     try{
 
 
-
         const type =
         WhoISThisIntel.detect(
             value
@@ -556,7 +629,7 @@ async function analyze(){
 
 
 
-        const normalized =
+        const clean =
         WhoISThisIntel.normalize(
             value,
             type
@@ -565,40 +638,47 @@ async function analyze(){
 
 
         addSummary(
-            `Detected: ${type}`
+            `Detected type: ${type}`
         );
 
 
 
 
 
-        if(type==="IPv4" || type==="IPv6"){
+        if(
+            type==="IPv4" ||
+            type==="IPv6"
+        ){
 
 
             await analyzeIP(
-                normalized
+                clean
             );
 
 
         }
 
 
-        else if(type==="DOMAIN"){
+        else if(
+            type==="DOMAIN"
+        ){
 
 
             await analyzeDomain(
-                normalized
+                clean
             );
 
 
         }
 
 
-        else if(type==="MAC"){
+        else if(
+            type==="MAC"
+        ){
 
 
             await analyzeMAC(
-                normalized
+                clean
             );
 
 
@@ -609,11 +689,12 @@ async function analyze(){
 
 
             throw new Error(
-                "Unknown input type"
+                "Unsupported input"
             );
 
 
         }
+
 
 
 
@@ -624,8 +705,8 @@ async function analyze(){
         );
 
 
-
     }
+
 
 
     catch(error){
@@ -651,6 +732,7 @@ async function analyze(){
 
 
 
+
 }
 
 
@@ -665,51 +747,50 @@ async function analyze(){
 // ======================================================
 
 
-button.addEventListener(
-    "click",
-    analyze
-);
+button.onclick =
+analyze;
 
 
 
-input.addEventListener(
-    "keydown",
-    e=>{
+
+input.onkeydown =
+(e)=>{
 
 
-        if(e.key==="Enter"){
+    if(
+        e.key==="Enter"
+    ){
 
-            analyze();
-
-        }
-
+        analyze();
 
     }
-);
+
+
+};
 
 
 
 
 
 document
-.querySelectorAll(".example")
+.querySelectorAll(
+    ".example"
+)
 .forEach(btn=>{
 
 
-    btn.addEventListener(
-        "click",
-        ()=>{
+    btn.onclick =
+    ()=>{
 
 
-            input.value =
-            btn.textContent.trim();
+        input.value =
+        btn.textContent.trim();
 
 
-            analyze();
+        analyze();
 
 
-        }
-    );
+    };
 
 
 });
@@ -718,19 +799,7 @@ document
 
 
 
-window.addEventListener(
-    "load",
-    ()=>{
-
-
-        input.focus();
-
-
-        console.log(
-            "%cWhoISThis Online",
-            "color:#00d4ff;font-size:20px;font-weight:bold;"
-        );
-
-
-    }
+console.log(
+"%cWhoISThis Ready",
+"color:#00d4ff;font-size:18px;font-weight:bold;"
 );
