@@ -2,11 +2,12 @@
 ==========================================================
 WhoISThis
 
-ssl.js
+ssl.js v2
 
 SSL / TLS Intelligence Engine
 
-Uses Certificate Transparency data
+Uses Certificate Transparency logs
+
 ==========================================================
 */
 
@@ -15,10 +16,6 @@ window.WhoISThisSSL = {
 
 
 
-
-// ======================================================
-// Certificate Transparency API
-// ======================================================
 
 
 endpoint:
@@ -31,7 +28,7 @@ endpoint:
 
 
 // ======================================================
-// Domain Cleanup
+// Clean Domain
 // ======================================================
 
 
@@ -40,18 +37,16 @@ normalize(domain){
 
     return domain
 
-        .replace(
-            /^https?:\/\//,
-            ""
-        )
+    .replace(
+        /^https?:\/\//,
+        ""
+    )
 
-        .replace(
-            /\/.*$/,
-            ""
-        )
+    .split("/")[0]
 
-        .toLowerCase();
+    .trim()
 
+    .toLowerCase();
 
 
 },
@@ -63,54 +58,52 @@ normalize(domain){
 
 
 // ======================================================
-// Certificate Lookup
+// Fetch Certificates
 // ======================================================
 
 
-async lookup(domain){
+async fetchCertificates(domain){
+
 
 
     try{
-
-
-        const clean =
-        this.normalize(domain);
-
 
 
         const response =
         await fetch(
 
             this.endpoint +
-            encodeURIComponent(clean)
+            encodeURIComponent(
+                domain
+            )
 
         );
 
 
 
-        const data =
-        await response.json();
+        if(
+            !response.ok
+        )
+            return [];
 
 
 
-        return data || [];
+        return await response.json();
 
 
 
     }
 
-
     catch(error){
 
 
         console.error(
-            "SSL lookup failed:",
+            "Certificate lookup failed",
             error
         );
 
 
         return [];
-
 
     }
 
@@ -124,7 +117,91 @@ async lookup(domain){
 
 
 // ======================================================
-// Analyze Certificates
+// Extract Domains
+// ======================================================
+
+
+extractDomains(certificates){
+
+
+
+    let domains =
+    new Set();
+
+
+
+    certificates.forEach(cert=>{
+
+
+        if(
+            cert.name_value
+        ){
+
+
+            cert.name_value
+
+            .split("\n")
+
+            .forEach(name=>{
+
+
+                domains.add(
+                    name.trim()
+                );
+
+
+            });
+
+
+        }
+
+
+    });
+
+
+
+    return [
+        ...domains
+    ];
+
+
+
+},
+
+
+
+
+
+
+
+// ======================================================
+// Wildcard Detection
+// ======================================================
+
+
+hasWildcard(domains){
+
+
+
+    return domains.some(
+        domain =>
+        domain.startsWith(
+            "*."
+        )
+    );
+
+
+
+},
+
+
+
+
+
+
+
+// ======================================================
+// Analyze
 // ======================================================
 
 
@@ -132,15 +209,23 @@ async analyze(domain){
 
 
 
-    const certificates =
-    await this.lookup(
+    const clean =
+    this.normalize(
         domain
     );
 
 
 
+    const certificates =
+    await this.fetchCertificates(
+        clean
+    );
+
+
+
+
     if(
-        certificates.length === 0
+        certificates.length===0
     ){
 
 
@@ -165,47 +250,25 @@ async analyze(domain){
 
 
 
+
+    const first =
+    certificates[0];
+
+
+
     const latest =
     certificates[
-        certificates.length - 1
+        certificates.length-1
     ];
 
 
 
 
 
-
-    let names =
-    new Set();
-
-
-
-    certificates.forEach(cert=>{
-
-
-        if(
-            cert.name_value
-        ){
-
-
-            cert.name_value
-            .split("\n")
-            .forEach(name=>{
-
-
-                names.add(
-                    name
-                );
-
-
-            });
-
-
-        }
-
-
-    });
-
+    const domains =
+    this.extractDomains(
+        certificates
+    );
 
 
 
@@ -220,7 +283,7 @@ async analyze(domain){
 
 
 
-        domain,
+        domain:clean,
 
 
 
@@ -238,14 +301,11 @@ async analyze(domain){
 
 
 
-
         firstSeen:
 
-        certificates[0]
-        .entry_timestamp
+        first.entry_timestamp
         ||
         "-",
-
 
 
 
@@ -257,11 +317,27 @@ async analyze(domain){
 
 
 
+        wildcard:
 
-        domains:
+        this.hasWildcard(
+            domains
+        )
+        ?
+        "Yes"
+        :
+        "No",
 
-        Array.from(
-            names
+
+
+        domains,
+
+
+
+        primaryDomains:
+
+        domains.slice(
+            0,
+            10
         ),
 
 
@@ -285,7 +361,6 @@ async analyze(domain){
 
 
 
-
 };
 
 
@@ -294,7 +369,7 @@ async analyze(domain){
 
 console.log(
 
-"%cWhoISThis SSL Engine Loaded",
+"%cWhoISThis SSL Engine v2 Loaded",
 
 "color:#00d4ff;font-weight:bold;"
 
