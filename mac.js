@@ -1,11 +1,13 @@
 /*
 ==========================================================
 WhoISThis
-mac.js
+
+mac.js v2
 
 MAC Address Intelligence Engine
 
-Uses IEEE OUI style manufacturer mapping.
+Uses WhoISThisDB.macVendors
+
 ==========================================================
 */
 
@@ -17,134 +19,21 @@ window.WhoISThisMAC = {
 
 
 // ======================================================
-// Local OUI Database
-// Expand with IEEE OUI exports
+// Normalize MAC
 // ======================================================
 
 
-vendors:{
+normalize(mac){
 
 
+    return mac
 
-"001A2B":{
+    .replace(
+        /[^a-fA-F0-9]/g,
+        ""
+    )
 
-vendor:"Cisco Systems",
-
-type:"Network Equipment",
-
-assignment:"MA-L"
-
-},
-
-
-
-"001B63":{
-
-vendor:"Apple Inc.",
-
-type:"Consumer Electronics",
-
-assignment:"MA-L"
-
-},
-
-
-
-"3C5AB4":{
-
-vendor:"Google LLC",
-
-type:"Smart Devices / Networking",
-
-assignment:"MA-L"
-
-},
-
-
-
-"F4F5D8":{
-
-vendor:"Google LLC",
-
-type:"Consumer Electronics",
-
-assignment:"MA-L"
-
-},
-
-
-
-"FCFBFB":{
-
-vendor:"Apple Inc.",
-
-type:"Consumer Electronics",
-
-assignment:"MA-L"
-
-},
-
-
-
-"DCFE07":{
-
-vendor:"Amazon Technologies",
-
-type:"IoT / Smart Home",
-
-assignment:"MA-L"
-
-},
-
-
-
-"001C42":{
-
-vendor:"Parallels",
-
-type:"Virtual Machine",
-
-assignment:"MA-L"
-
-},
-
-
-
-"005056":{
-
-vendor:"VMware",
-
-type:"Virtualization",
-
-assignment:"MA-L"
-
-},
-
-
-
-"525400":{
-
-vendor:"QEMU",
-
-type:"Virtual Machine",
-
-assignment:"Private / Virtual"
-
-},
-
-
-
-"00155D":{
-
-vendor:"Microsoft",
-
-type:"Virtualization / Networking",
-
-assignment:"MA-L"
-
-}
-
-
+    .toUpperCase();
 
 },
 
@@ -163,37 +52,13 @@ isValid(mac){
 
 
 
-    return /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/
+    return (
 
-    .test(mac);
+        /^[0-9A-F]{12}$/
 
+        .test(mac)
 
-
-},
-
-
-
-
-
-
-
-// ======================================================
-// Normalize
-// ======================================================
-
-
-normalize(mac){
-
-
-    return mac
-
-    .replaceAll(
-        "-",
-        ":"
-    )
-
-    .toUpperCase();
-
+    );
 
 
 },
@@ -205,21 +70,14 @@ normalize(mac){
 
 
 // ======================================================
-// Extract OUI
+// Get OUI
 // ======================================================
 
 
 getOUI(mac){
 
 
-    return mac
-
-    .replaceAll(
-        ":",
-        ""
-    )
-
-    .substring(
+    return mac.substring(
         0,
         6
     );
@@ -234,25 +92,114 @@ getOUI(mac){
 
 
 // ======================================================
-// Analyze MAC
+// MAC Address Properties
 // ======================================================
 
 
-async analyze(mac){
+properties(mac){
 
 
 
-    const normalized =
-        this.normalize(
-            mac
-        );
+    const firstByte =
+    parseInt(
+        mac.substring(
+            0,
+            2
+        ),
+        16
+    );
 
+
+
+    return {
+
+
+
+        multicast:
+
+        Boolean(
+            firstByte & 1
+        ),
+
+
+
+        locallyAdministered:
+
+        Boolean(
+            firstByte & 2
+        ),
+
+
+
+        type:
+
+        (
+            firstByte & 2
+        )
+
+        ?
+
+        "Locally Administered"
+
+        :
+
+        "Universal"
+
+
+
+    };
+
+
+
+},
+
+
+
+
+
+
+
+// ======================================================
+// Format MAC
+// ======================================================
+
+
+format(mac){
+
+
+    return mac.match(
+        /.{2}/g
+    )
+    .join(":");
+
+
+},
+
+
+
+
+
+
+
+// ======================================================
+// Analyze
+// ======================================================
+
+
+async analyze(input){
+
+
+
+    const mac =
+    this.normalize(
+        input
+    );
 
 
 
     if(
         !this.isValid(
-            normalized
+            mac
         )
     ){
 
@@ -267,6 +214,7 @@ async analyze(mac){
             "Invalid MAC address"
 
 
+
         };
 
 
@@ -276,16 +224,47 @@ async analyze(mac){
 
 
 
+
     const oui =
-        this.getOUI(
-            normalized
+    this.getOUI(
+        mac
+    );
+
+
+
+
+
+
+    let vendor =
+    null;
+
+
+
+    if(
+        window.WhoISThisDB
+    ){
+
+
+        vendor =
+        WhoISThisDB.findMAC(
+            oui
         );
 
 
+    }
 
 
-    const vendor =
-        this.vendors[oui];
+
+
+
+
+
+    const props =
+    this.properties(
+        mac
+    );
+
+
 
 
 
@@ -299,7 +278,11 @@ async analyze(mac){
         success:true,
 
 
-        mac:normalized,
+
+        mac:
+        this.format(
+            mac
+        ),
 
 
 
@@ -317,7 +300,7 @@ async analyze(mac){
 
         type:
 
-        vendor?.type
+        vendor?.device
         ||
         "Unknown",
 
@@ -325,19 +308,37 @@ async analyze(mac){
 
         assignment:
 
-        vendor?.assignment
-        ||
-        "Unknown",
+        props.type,
+
+
+
+        multicast:
+
+        props.multicast
+        ?
+        "Yes"
+        :
+        "No",
+
+
+
+        locallyAdministered:
+
+        props.locallyAdministered
+        ?
+        "Yes"
+        :
+        "No",
 
 
 
         confidence:
 
         vendor
-
-        ? "Verified OUI Match"
-
-        : "No Local Match"
+        ?
+        "IEEE OUI Match"
+        :
+        "Unknown Vendor"
 
 
 
@@ -353,6 +354,7 @@ async analyze(mac){
 
 
 
+
 };
 
 
@@ -361,7 +363,7 @@ async analyze(mac){
 
 console.log(
 
-"%cWhoISThis MAC Engine Loaded",
+"%cWhoISThis MAC Engine v2 Loaded",
 
 "color:#00d4ff;font-weight:bold;"
 
