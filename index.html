@@ -8,19 +8,16 @@
 
 <title>WhoISThis • Internet Intelligence</title>
 
-<meta name="description" content="Analyze IP addresses, domains, and MAC addresses with public intelligence data.">
-
 <link rel="stylesheet" href="styles.css">
-
 
 <script src="database.js"></script>
 <script src="intelligence.js"></script>
 <script src="dns.js"></script>
 <script src="whois.js"></script>
 <script src="mac.js"></script>
+<script src="ssl.js"></script>
 
 <script src="script.js" defer></script>
-
 
 </head>
 
@@ -38,17 +35,13 @@
 
 
 
-
 <header>
 
-
 <div class="logo">
-
 
 <div class="logo-icon">
 🌐
 </div>
-
 
 <div>
 
@@ -62,12 +55,9 @@ Internet Intelligence Platform
 
 </div>
 
-
 </div>
 
-
 </header>
-
 
 
 
@@ -80,42 +70,32 @@ Internet Intelligence Platform
 
 
 <h2>
-Discover anything connected.
+Investigate anything online.
 </h2>
 
 
 <p>
-
-Analyze IP addresses,
-websites, domains,
-and MAC addresses.
-
+Analyze IP addresses, websites,
+domains, and MAC addresses.
 </p>
-
 
 
 
 <div class="search">
 
-
 <input
 
 id="ipInput"
 
-type="text"
-
-placeholder="IP, domain, or MAC address"
+placeholder="Enter IP, domain, or MAC address"
 
 autocomplete="off"
 
 />
 
 
-
 <button id="analyzeBtn">
-
 Analyze
-
 </button>
 
 
@@ -124,12 +104,10 @@ Analyze
 
 
 
-
 <div class="examples">
 
-
 <span>
-Try:
+Examples:
 </span>
 
 
@@ -139,7 +117,7 @@ Try:
 
 
 <button class="example">
-google.com
+github.com
 </button>
 
 
@@ -151,9 +129,8 @@ google.com
 </div>
 
 
+
 </section>
-
-
 
 
 
@@ -171,12 +148,7 @@ google.com
 
 
 
-
-<!-- Intelligence -->
-
-
 <div class="card">
-
 
 <h3>
 🧠 Intelligence Summary
@@ -185,33 +157,16 @@ google.com
 
 <div class="rows">
 
-
 <div class="row">
-
-<span>
-Confidence
-</span>
-
-<strong id="confidence">
--
-</strong>
-
+<span>Status</span>
+<strong id="status">-</strong>
 </div>
 
 
-
 <div class="row">
-
-<span>
-Status
-</span>
-
-<strong id="status">
--
-</strong>
-
+<span>Confidence</span>
+<strong id="confidence">-</strong>
 </div>
-
 
 
 </div>
@@ -219,7 +174,6 @@ Status
 
 <ul id="summaryList" class="summary"></ul>
 
-
 </div>
 
 
@@ -230,14 +184,10 @@ Status
 
 
 
-<!-- Core -->
-
-
 <div class="card">
 
-
 <h3>
-🌐 Core Information
+🎯 Target
 </h3>
 
 
@@ -245,76 +195,36 @@ Status
 
 
 <div class="row">
-
-<span>
-Target
-</span>
-
-<strong id="ip">
--
-</strong>
-
+<span>Input</span>
+<strong id="ip">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Type
-</span>
-
-<strong id="version">
--
-</strong>
-
+<span>Type</span>
+<strong id="version">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Country
-</span>
-
-<strong id="country">
--
-</strong>
-
+<span>Country</span>
+<strong id="country">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Region
-</span>
-
-<strong id="region">
--
-</strong>
-
+<span>Region</span>
+<strong id="region">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-City
-</span>
-
-<strong id="city">
--
-</strong>
-
+<span>City</span>
+<strong id="city">-</strong>
 </div>
 
 
 </div>
-
 
 </div>
 
@@ -324,16 +234,12 @@ City
 
 
 
-
-
-<!-- Network -->
 
 
 <div class="card">
 
-
 <h3>
-📡 Network Intelligence
+📡 Network
 </h3>
 
 
@@ -341,63 +247,30 @@ City
 
 
 <div class="row">
-
-<span>
-ISP
-</span>
-
-<strong id="isp">
--
-</strong>
-
+<span>ISP</span>
+<strong id="isp">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Organization
-</span>
-
-<strong id="org">
--
-</strong>
-
+<span>Organization</span>
+<strong id="org">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-ASN
-</span>
-
-<strong id="asn">
--
-</strong>
-
+<span>ASN</span>
+<strong id="asn">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Domain
-</span>
-
-<strong id="domain">
--
-</strong>
-
+<span>Domain</span>
+<strong id="domain">-</strong>
 </div>
 
 
-
 </div>
-
 
 </div>
 
@@ -407,13 +280,9 @@ Domain
 
 
 
-
-
-<!-- Location -->
 
 
 <div class="card">
-
 
 <h3>
 📍 Location
@@ -424,62 +293,30 @@ Domain
 
 
 <div class="row">
-
-<span>
-Latitude
-</span>
-
-<strong id="lat">
--
-</strong>
-
+<span>Latitude</span>
+<strong id="lat">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Longitude
-</span>
-
-<strong id="lon">
--
-</strong>
-
+<span>Longitude</span>
+<strong id="lon">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Timezone
-</span>
-
-<strong id="timezone">
--
-</strong>
-
+<span>Timezone</span>
+<strong id="timezone">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Map
-</span>
-
-<strong id="map">
--
-</strong>
-
+<span>Map</span>
+<strong id="map">-</strong>
 </div>
 
 
 </div>
-
 
 </div>
 
@@ -489,13 +326,9 @@ Map
 
 
 
-
-
-<!-- Security -->
 
 
 <div class="card">
-
 
 <h3>
 🛡 Security
@@ -506,62 +339,30 @@ Map
 
 
 <div class="row">
-
-<span>
-VPN
-</span>
-
-<strong id="vpn">
--
-</strong>
-
+<span>VPN</span>
+<strong id="vpn">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Proxy
-</span>
-
-<strong id="proxy">
--
-</strong>
-
+<span>Proxy</span>
+<strong id="proxy">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Tor
-</span>
-
-<strong id="tor">
--
-</strong>
-
+<span>Tor</span>
+<strong id="tor">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Hosting
-</span>
-
-<strong id="hosting">
--
-</strong>
-
+<span>Hosting</span>
+<strong id="hosting">-</strong>
 </div>
 
 
 </div>
-
 
 </div>
 
@@ -571,16 +372,12 @@ Hosting
 
 
 
-
-
-<!-- DNS -->
 
 
 <div class="card">
 
-
 <h3>
-📡 DNS Records
+📡 DNS Intelligence
 </h3>
 
 
@@ -588,76 +385,36 @@ Hosting
 
 
 <div class="row">
-
-<span>
-Reverse DNS
-</span>
-
-<strong id="reverseDNS">
--
-</strong>
-
+<span>A Records</span>
+<strong id="aRecords">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-A Records
-</span>
-
-<strong id="aRecords">
--
-</strong>
-
+<span>AAAA Records</span>
+<strong id="aaaaRecords">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-AAAA Records
-</span>
-
-<strong id="aaaaRecords">
--
-</strong>
-
+<span>MX Records</span>
+<strong id="mxRecords">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-MX Records
-</span>
-
-<strong id="mxRecords">
--
-</strong>
-
+<span>TXT Records</span>
+<strong id="txtRecords">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Nameservers
-</span>
-
-<strong id="nameservers">
--
-</strong>
-
+<span>Nameservers</span>
+<strong id="nameservers">-</strong>
 </div>
 
 
 </div>
-
 
 </div>
 
@@ -667,13 +424,9 @@ Nameservers
 
 
 
-
-
-<!-- WHOIS -->
 
 
 <div class="card">
-
 
 <h3>
 📄 WHOIS / RDAP
@@ -684,63 +437,37 @@ Nameservers
 
 
 <div class="row">
-
-<span>
-Organization
-</span>
-
-<strong id="whoisOrg">
--
-</strong>
-
+<span>Organization</span>
+<strong id="whoisOrg">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Created
-</span>
-
-<strong id="created">
--
-</strong>
-
+<span>Created</span>
+<strong id="created">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Updated
-</span>
-
-<strong id="updated">
--
-</strong>
-
+<span>Updated</span>
+<strong id="updated">-</strong>
 </div>
-
 
 
 <div class="row">
+<span>Expires</span>
+<strong id="expires">-</strong>
+</div>
 
-<span>
-Expiration
-</span>
 
-<strong id="expires">
--
-</strong>
-
+<div class="row">
+<span>Nameservers</span>
+<strong id="whoisNS">-</strong>
 </div>
 
 
 </div>
 
-
 </div>
 
 
@@ -749,13 +476,55 @@ Expiration
 
 
 
-
-
-<!-- MAC -->
 
 
 <div class="card">
 
+<h3>
+🔐 SSL Intelligence
+</h3>
+
+
+<div class="rows">
+
+
+<div class="row">
+<span>Issuer</span>
+<strong id="sslIssuer">-</strong>
+</div>
+
+
+<div class="row">
+<span>Certificates</span>
+<strong id="sslCount">-</strong>
+</div>
+
+
+<div class="row">
+<span>First Seen</span>
+<strong id="sslFirst">-</strong>
+</div>
+
+
+<div class="row">
+<span>Latest</span>
+<strong id="sslLatest">-</strong>
+</div>
+
+
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="card">
 
 <h3>
 💻 MAC Intelligence
@@ -766,62 +535,30 @@ Expiration
 
 
 <div class="row">
-
-<span>
-Vendor
-</span>
-
-<strong id="macVendor">
--
-</strong>
-
+<span>Vendor</span>
+<strong id="macVendor">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-OUI
-</span>
-
-<strong id="macOui">
--
-</strong>
-
+<span>OUI</span>
+<strong id="macOui">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Device Type
-</span>
-
-<strong id="macType">
--
-</strong>
-
+<span>Device</span>
+<strong id="macType">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Assignment
-</span>
-
-<strong id="macAssignment">
--
-</strong>
-
+<span>Assignment</span>
+<strong id="macAssignment">-</strong>
 </div>
 
 
 </div>
-
 
 </div>
 
@@ -831,16 +568,12 @@ Assignment
 
 
 
-
-
-<!-- Technical -->
 
 
 <div class="card">
 
-
 <h3>
-⚙ Technical
+🌍 Registry
 </h3>
 
 
@@ -848,48 +581,24 @@ Assignment
 
 
 <div class="row">
-
-<span>
-Registry
-</span>
-
-<strong id="registry">
--
-</strong>
-
+<span>Registry</span>
+<strong id="registry">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-CIDR
-</span>
-
-<strong id="cidr">
--
-</strong>
-
+<span>CIDR</span>
+<strong id="cidr">-</strong>
 </div>
-
 
 
 <div class="row">
-
-<span>
-Raw
-</span>
-
-<strong id="raw">
--
-</strong>
-
+<span>Abuse</span>
+<strong id="abuse">-</strong>
 </div>
 
 
 </div>
-
 
 </div>
 
@@ -899,10 +608,8 @@ Raw
 
 
 </div>
-
 
 </section>
-
 
 
 </main>
@@ -911,15 +618,11 @@ Raw
 
 
 
-
-
 <footer>
 
-WhoISThis • Open-source internet intelligence
+WhoISThis • Open-source Internet Intelligence
 
 </footer>
-
-
 
 
 </body>
