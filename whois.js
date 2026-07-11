@@ -1,11 +1,16 @@
 /*
 ==========================================================
 WhoISThis
-whois.js
+
+whois.js v2
 
 WHOIS / RDAP Intelligence Engine
 
-Browser-compatible WHOIS replacement
+Supports:
+- Domains
+- IPv4
+- IPv6
+
 ==========================================================
 */
 
@@ -14,35 +19,30 @@ window.WhoISThisWHOIS = {
 
 
 
+
+
 // ======================================================
-// RDAP Servers
+// RDAP Endpoints
 // ======================================================
 
 
-servers:{
+servers:[
+
+"https://rdap.org",
+
+"https://rdap.arin.net/registry",
+
+"https://rdap.db.ripe.net",
+
+"https://rdap.apnic.net",
+
+"https://rdap.lacnic.net/rdap",
+
+"https://rdap.afrinic.net/rdap"
+
+],
 
 
-    arin:
-    "https://rdap.arin.net/registry",
-
-
-    ripe:
-    "https://rdap.db.ripe.net",
-
-
-    apnic:
-    "https://rdap.apnic.net",
-
-
-    lacnic:
-    "https://rdap.lacnic.net/rdap",
-
-
-    afrinic:
-    "https://rdap.afrinic.net/rdap"
-
-
-},
 
 
 
@@ -59,6 +59,7 @@ isIP(value){
     return (
 
         /^(\d{1,3}\.){3}\d{1,3}$/
+
         .test(value)
 
         ||
@@ -77,67 +78,44 @@ isIP(value){
 
 
 // ======================================================
-// IP Lookup
+// Fetch RDAP
 // ======================================================
 
 
-async ipLookup(ip){
+async fetchRDAP(url){
+
+
+    try{
+
+
+        const response =
+        await fetch(url);
 
 
 
-    const endpoints = [
+        if(
+            response.ok
+        ){
 
 
-        `${this.servers.arin}/ip/${ip}`,
+            return await response.json();
 
-        `${this.servers.ripe}/ip/${ip}`,
-
-        `${this.servers.apnic}/ip/${ip}`,
-
-        `${this.servers.lacnic}/ip/${ip}`
-
-
-    ];
-
-
-
-
-    for(
-        const url of endpoints
-    ){
-
-
-        try{
-
-
-            const response =
-            await fetch(url);
-
-
-
-            if(
-                response.ok
-            ){
-
-
-                return await response.json();
-
-
-            }
-
-
-        }
-
-        catch{
-
-            continue;
 
         }
 
 
     }
 
+    catch(error){
 
+
+        console.warn(
+            "RDAP failed:",
+            url
+        );
+
+
+    }
 
 
     return null;
@@ -159,41 +137,65 @@ async ipLookup(ip){
 async domainLookup(domain){
 
 
+    return await this.fetchRDAP(
 
-    try{
+        `https://rdap.org/domain/${domain}`
+
+    );
 
 
-        const response =
-        await fetch(
+},
 
-            `https://rdap.org/domain/${domain}`
 
+
+
+
+
+
+// ======================================================
+// IP Lookup
+// ======================================================
+
+
+async ipLookup(ip){
+
+
+
+    const urls=[
+
+
+        `https://rdap.arin.net/registry/ip/${ip}`,
+
+        `https://rdap.db.ripe.net/ip/${ip}`,
+
+        `https://rdap.apnic.net/ip/${ip}`,
+
+        `https://rdap.lacnic.net/rdap/ip/${ip}`
+
+
+    ];
+
+
+
+
+    for(
+        const url of urls
+    ){
+
+
+        const data =
+        await this.fetchRDAP(
+            url
         );
 
 
 
-        if(
-            response.ok
-        ){
-
-            return await response.json();
-
-        }
-
+        if(data)
+            return data;
 
 
     }
 
-    catch(error){
-
-
-        console.error(
-            "RDAP Error:",
-            error
-        );
-
-
-    }
 
 
 
@@ -209,11 +211,11 @@ async domainLookup(domain){
 
 
 // ======================================================
-// Extract Events
+// Events
 // ======================================================
 
 
-getEvent(data,type){
+event(data,type){
 
 
     if(
@@ -223,17 +225,24 @@ getEvent(data,type){
 
 
 
-    const event =
+    const found =
     data.events.find(
         e =>
-        e.eventAction === type
+        e.eventAction
+        ?.toLowerCase()
+        .includes(
+            type
+        )
     );
 
 
 
-    return event
-        ? event.eventDate
-        : "-";
+    return found
+    ?
+    found.eventDate
+    :
+    "-";
+
 
 
 },
@@ -245,17 +254,19 @@ getEvent(data,type){
 
 
 // ======================================================
-// Extract Entities
+// Organization
 // ======================================================
 
 
-getOrganization(data){
+organization(data){
+
 
 
     if(
-        !data?.entities
+        !data.entities
     )
         return "-";
+
 
 
 
@@ -264,31 +275,35 @@ getOrganization(data){
     ){
 
 
+        const vcard =
+        entity.vcardArray;
+
+
+
         if(
-            entity.vcardArray
+            vcard
         ){
 
 
             const name =
-            entity.vcardArray[1]
+            vcard[1]
             .find(
-                x =>
-                x[0] === "fn"
+                x=>
+                x[0]==="fn"
             );
 
 
 
-            if(name){
-
+            if(name)
                 return name[3];
-
-            }
 
 
         }
 
 
+
     }
+
 
 
 
@@ -304,25 +319,99 @@ getOrganization(data){
 
 
 // ======================================================
-// Nameservers
+// Contact Extraction
 // ======================================================
 
 
-getNameservers(data){
+contacts(data){
+
+
+
+    let emails=[];
 
 
 
     if(
-        !data?.nameservers
+        !data.entities
+    )
+        return [];
+
+
+
+
+    data.entities.forEach(entity=>{
+
+
+        if(
+            entity.vcardArray
+        ){
+
+
+            entity.vcardArray[1]
+            .forEach(item=>{
+
+
+                if(
+                    item[0]==="email"
+                ){
+
+
+                    emails.push(
+                        item[3]
+                    );
+
+
+                }
+
+
+            });
+
+
+        }
+
+
+    });
+
+
+
+
+    return [
+
+        ...new Set(emails)
+
+    ];
+
+
+
+},
+
+
+
+
+
+
+
+// ======================================================
+// Nameservers
+// ======================================================
+
+
+nameservers(data){
+
+
+
+    if(
+        !data.nameservers
     )
         return [];
 
 
 
     return data.nameservers.map(
-        ns =>
+        ns=>
         ns.ldhName
     );
+
 
 
 },
@@ -338,7 +427,7 @@ getNameservers(data){
 // ======================================================
 
 
-async analyze(value){
+async analyze(target){
 
 
 
@@ -347,13 +436,13 @@ async analyze(value){
 
 
     if(
-        this.isIP(value)
+        this.isIP(target)
     ){
 
 
         data =
         await this.ipLookup(
-            value
+            target
         );
 
 
@@ -364,11 +453,12 @@ async analyze(value){
 
         data =
         await this.domainLookup(
-            value
+            target
         );
 
 
     }
+
 
 
 
@@ -379,10 +469,14 @@ async analyze(value){
 
         return {
 
+
             success:false,
 
+
             message:
-            "No RDAP information found."
+            "No RDAP information found"
+
+
 
         };
 
@@ -397,31 +491,62 @@ async analyze(value){
     return {
 
 
+
         success:true,
 
 
-        handle:
 
+        target,
+
+
+
+        handle:
         data.handle || "-",
 
 
-        name:
 
+        name:
         data.name || "-",
 
 
 
         organization:
-
-        this.getOrganization(
+        this.organization(
             data
         ),
 
 
 
-        created:
+        registry:
+        data.port43
+        ||
+        data.rdapConformance
+        ?.join(", ")
+        ||
+        "-",
 
-        this.getEvent(
+
+
+        cidr:
+        data.cidr0_cidrs
+        ?
+        JSON.stringify(
+            data.cidr0_cidrs
+        )
+        :
+        "-",
+
+
+
+        country:
+        data.country
+        ||
+        "-",
+
+
+
+        created:
+        this.event(
             data,
             "registration"
         ),
@@ -429,17 +554,15 @@ async analyze(value){
 
 
         updated:
-
-        this.getEvent(
+        this.event(
             data,
-            "last changed"
+            "changed"
         ),
 
 
 
         expires:
-
-        this.getEvent(
+        this.event(
             data,
             "expiration"
         ),
@@ -447,14 +570,21 @@ async analyze(value){
 
 
         nameservers:
-
-        this.getNameservers(
+        this.nameservers(
             data
         ),
 
 
 
-        raw:data
+        abuse:
+        this.contacts(
+            data
+        ),
+
+
+
+        raw:
+        data
 
 
 
@@ -478,7 +608,7 @@ async analyze(value){
 
 console.log(
 
-"%cWhoISThis WHOIS Engine Loaded",
+"%cWhoISThis WHOIS Engine v2 Loaded",
 
 "color:#00d4ff;font-weight:bold;"
 
