@@ -6,24 +6,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>WhoISThis • Domain Lookup Tool</title>
+<title>WhoISThis • Internet Intelligence</title>
 
-<meta name="description" content="Analyze IP addresses with detailed public network intelligence.">
-
-<meta name="theme-color" content="#070b12">
-
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+<meta name="description" content="Analyze IP addresses, domains, and MAC addresses with public intelligence data.">
 
 <link rel="stylesheet" href="styles.css">
 
 
-<!-- App -->
 <script src="database.js"></script>
+<script src="intelligence.js"></script>
+<script src="dns.js"></script>
+<script src="whois.js"></script>
+<script src="mac.js"></script>
+
 <script src="script.js" defer></script>
 
 
@@ -49,6 +44,7 @@
 
 <div class="logo">
 
+
 <div class="logo-icon">
 🌐
 </div>
@@ -61,7 +57,7 @@ WhoISThis
 </h1>
 
 <p>
-Internet Intelligence
+Internet Intelligence Platform
 </p>
 
 </div>
@@ -80,23 +76,21 @@ Internet Intelligence
 <main>
 
 
-
 <section class="hero">
 
 
 <h2>
-Discover any IP address.
+Discover anything connected.
 </h2>
 
 
 <p>
 
-Explore public network data,
-ownership, location, ASN,
-security information, and DNS records.
+Analyze IP addresses,
+websites, domains,
+and MAC addresses.
 
 </p>
-
 
 
 
@@ -105,16 +99,23 @@ security information, and DNS records.
 
 
 <input
+
 id="ipInput"
+
 type="text"
+
+placeholder="IP, domain, or MAC address"
+
 autocomplete="off"
-spellcheck="false"
-placeholder="8.8.8.8"
->
+
+/>
+
 
 
 <button id="analyzeBtn">
+
 Analyze
+
 </button>
 
 
@@ -138,20 +139,21 @@ Try:
 
 
 <button class="example">
-1.1.1.1
+google.com
 </button>
 
 
 <button class="example">
-208.67.222.222
+3C:5A:B4:12:34:56
 </button>
 
 
 </div>
 
 
-
 </section>
+
+
 
 
 
@@ -163,6 +165,8 @@ Try:
 
 
 <div class="grid">
+
+
 
 
 
@@ -195,6 +199,7 @@ Confidence
 </div>
 
 
+
 <div class="row">
 
 <span>
@@ -208,32 +213,31 @@ Status
 </div>
 
 
-</div>
-
-
-
-<ul id="summaryList" class="summary">
-
-</ul>
-
 
 </div>
 
 
+<ul id="summaryList" class="summary"></ul>
+
+
+</div>
 
 
 
 
 
 
-<!-- Overview -->
+
+
+
+<!-- Core -->
 
 
 <div class="card">
 
 
 <h3>
-🌐 Overview
+🌐 Core Information
 </h3>
 
 
@@ -241,30 +245,35 @@ Status
 
 
 <div class="row">
+
 <span>
-IP Address
+Target
 </span>
 
 <strong id="ip">
 -
 </strong>
+
 </div>
 
 
 
 <div class="row">
+
 <span>
-Version
+Type
 </span>
 
 <strong id="version">
 -
 </strong>
+
 </div>
 
 
 
 <div class="row">
+
 <span>
 Country
 </span>
@@ -272,11 +281,13 @@ Country
 <strong id="country">
 -
 </strong>
+
 </div>
 
 
 
 <div class="row">
+
 <span>
 Region
 </span>
@@ -284,11 +295,13 @@ Region
 <strong id="region">
 -
 </strong>
+
 </div>
 
 
 
 <div class="row">
+
 <span>
 City
 </span>
@@ -296,13 +309,15 @@ City
 <strong id="city">
 -
 </strong>
-</div>
-
 
 </div>
 
 
 </div>
+
+
+</div>
+
 
 
 
@@ -318,7 +333,7 @@ City
 
 
 <h3>
-📡 Network
+📡 Network Intelligence
 </h3>
 
 
@@ -326,6 +341,7 @@ City
 
 
 <div class="row">
+
 <span>
 ISP
 </span>
@@ -333,11 +349,13 @@ ISP
 <strong id="isp">
 -
 </strong>
+
 </div>
 
 
 
 <div class="row">
+
 <span>
 Organization
 </span>
@@ -345,11 +363,13 @@ Organization
 <strong id="org">
 -
 </strong>
+
 </div>
 
 
 
 <div class="row">
+
 <span>
 ASN
 </span>
@@ -357,11 +377,13 @@ ASN
 <strong id="asn">
 -
 </strong>
+
 </div>
 
 
 
 <div class="row">
+
 <span>
 Domain
 </span>
@@ -369,13 +391,16 @@ Domain
 <strong id="domain">
 -
 </strong>
+
+</div>
+
+
+
 </div>
 
 
 </div>
 
-
-</div>
 
 
 
@@ -437,6 +462,7 @@ Timezone
 </strong>
 
 </div>
+
 
 
 <div class="row">
@@ -554,7 +580,7 @@ Hosting
 
 
 <h3>
-📡 DNS
+📡 DNS Records
 </h3>
 
 
@@ -596,6 +622,198 @@ AAAA Records
 </span>
 
 <strong id="aaaaRecords">
+-
+</strong>
+
+</div>
+
+
+
+<div class="row">
+
+<span>
+MX Records
+</span>
+
+<strong id="mxRecords">
+-
+</strong>
+
+</div>
+
+
+
+<div class="row">
+
+<span>
+Nameservers
+</span>
+
+<strong id="nameservers">
+-
+</strong>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- WHOIS -->
+
+
+<div class="card">
+
+
+<h3>
+📄 WHOIS / RDAP
+</h3>
+
+
+<div class="rows">
+
+
+<div class="row">
+
+<span>
+Organization
+</span>
+
+<strong id="whoisOrg">
+-
+</strong>
+
+</div>
+
+
+
+<div class="row">
+
+<span>
+Created
+</span>
+
+<strong id="created">
+-
+</strong>
+
+</div>
+
+
+
+<div class="row">
+
+<span>
+Updated
+</span>
+
+<strong id="updated">
+-
+</strong>
+
+</div>
+
+
+
+<div class="row">
+
+<span>
+Expiration
+</span>
+
+<strong id="expires">
+-
+</strong>
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- MAC -->
+
+
+<div class="card">
+
+
+<h3>
+💻 MAC Intelligence
+</h3>
+
+
+<div class="rows">
+
+
+<div class="row">
+
+<span>
+Vendor
+</span>
+
+<strong id="macVendor">
+-
+</strong>
+
+</div>
+
+
+
+<div class="row">
+
+<span>
+OUI
+</span>
+
+<strong id="macOui">
+-
+</strong>
+
+</div>
+
+
+
+<div class="row">
+
+<span>
+Device Type
+</span>
+
+<strong id="macType">
+-
+</strong>
+
+</div>
+
+
+
+<div class="row">
+
+<span>
+Assignment
+</span>
+
+<strong id="macAssignment">
 -
 </strong>
 
@@ -660,7 +878,7 @@ CIDR
 <div class="row">
 
 <span>
-Raw Data
+Raw
 </span>
 
 <strong id="raw">
@@ -682,6 +900,7 @@ Raw Data
 
 </div>
 
+
 </section>
 
 
@@ -692,12 +911,13 @@ Raw Data
 
 
 
+
+
 <footer>
 
-WhoISThis • Open-source IP intelligence
+WhoISThis • Open-source internet intelligence
 
 </footer>
-
 
 
 
